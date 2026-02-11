@@ -24,10 +24,11 @@ th,td{
   text-align:center;
 }
 button{
-  padding:4px 6px;
+  padding:6px 8px;
   margin:2px;
   border:none;
-  border-radius:4px;
+  border-radius:6px;
+  font-size:12px;
 }
 .plus{background:#28a745;color:white;}
 .minus{background:#dc3545;color:white;}
@@ -38,12 +39,21 @@ button{
   padding:8px;
   margin:5px 0;
 }
+.undo{
+  background:#ffc107;
+  color:black;
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+}
 </style>
 </head>
 <body>
 
-<h3>検証カウンター（全体合算）</h3>
+<h3>検証カウンター</h3>
+
 <button class="refresh" onclick="loadData()">🔄 更新</button>
+<button class="undo" onclick="undoLast()">🧯 直前を取り消す</button>
 
 <table>
 <tr>
@@ -52,16 +62,23 @@ button{
 <th>優遇(BB)</th>
 <th>優遇(reg)</th>
 <th>地獄</th>
-<th>合計</th>
 </tr>
 <tbody id="tableBody"></tbody>
 </table>
 
 <script>
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzoXHmZBFEM0gu3t7r5J0i_f6klFgDkEfybtm7CSFrqUlyCBRCw-ZwVMgZcIpC_6JSS/exec";
+const GAS_URL = "ここにApps ScriptのURLを貼る";
+
+let lastAction = null;
 
 const rows = [
+"偽革命1","偽革命2","偽革命3",
+"下位AT1","BB1","下位AT後1",
+"BB2","下位AT後2","BB3"
+];
+
+const rowLabels = [
 "偽革命（二回前偽革命or下位ATでない）",
 "偽革命（2回前が偽革命）",
 "偽革命（2回前が下位AT）",
@@ -73,28 +90,41 @@ const rows = [
 "BB（2回前が下位AT）"
 ];
 
-const cols = ["優遇","優遇（BB）","優遇(reg)","地獄"];
+const cols = ["優遇","優遇BB","優遇REG","地獄"];
 
 function createTable(){
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
-  rows.forEach(r=>{
-    let rowHTML = `<tr><td>${r}</td>`;
+
+  rows.forEach((r,index)=>{
+    let rowHTML = `<tr><td>${rowLabels[index]}</td>`;
+
     cols.forEach(c=>{
       const id = r+"_"+c;
       rowHTML += `
       <td>
         <div id="${id}">0</div>
-        <button class="plus" onclick="send('${r}','${c}',1)">＋</button>
-        <button class="minus" onclick="send('${r}','${c}',-1)">－</button>
+        <button class="plus" onclick="confirmSend('${r}','${c}',1)">＋</button>
+        <button class="minus" onclick="confirmSend('${r}','${c}',-1)">－</button>
       </td>`;
     });
-    rowHTML += `<td id="${r}_total">0</td></tr>`;
+
+    rowHTML += `</tr>`;
     tbody.innerHTML += rowHTML;
   });
 }
 
+function confirmSend(category,type,value){
+  let actionText = value === 1 ? "追加" : "減算";
+  if(confirm(`${category} / ${type} を ${actionText} しますか？`)){
+    send(category,type,value);
+  }
+}
+
 async function send(category,type,value){
+
+  lastAction = {category,type,value};
+
   await fetch(GAS_URL,{
     method:"POST",
     body:JSON.stringify({
@@ -103,6 +133,29 @@ async function send(category,type,value){
       value:value
     })
   });
+
+  loadData();
+}
+
+async function undoLast(){
+
+  if(!lastAction){
+    alert("取り消す操作がありません");
+    return;
+  }
+
+  const reverseValue = lastAction.value * -1;
+
+  await fetch(GAS_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      category:lastAction.category,
+      type:lastAction.type,
+      value:reverseValue
+    })
+  });
+
+  lastAction = null;
   loadData();
 }
 
@@ -111,24 +164,16 @@ async function loadData(){
   const data = await res.json();
 
   rows.forEach(r=>{
-    let rowTotal = 0;
     cols.forEach(c=>{
       const key = r+"_"+c;
       const count = data[key] || 0;
       document.getElementById(key).innerText = count;
-      rowTotal += count;
     });
-    document.getElementById(r+"_total").innerText = rowTotal;
   });
 }
 
 createTable();
 loadData();
-
-</script>
-</body>
-</html>
-
 
 </script>
 </body>
