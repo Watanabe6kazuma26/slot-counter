@@ -43,7 +43,6 @@ button{
 <body>
 
 <h3>検証カウンター（全体合算）</h3>
-
 <button class="refresh" onclick="loadData()">🔄 更新</button>
 
 <table>
@@ -60,7 +59,7 @@ button{
 
 <script>
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyWoNuZunmhNsUj1X3hWbhmHkXLKQveV_2SGssCBMDOlZi-UXeQBYVvWpbBLUvEuaFQ/exec";
+const GAS_URL = "ここにApps ScriptのURLを貼る";
 
 const rows = [
 "偽革命（二回前偽革命or下位ATでない）",
@@ -78,6 +77,7 @@ const cols = ["優遇","優遇（BB）","優遇(reg)","地獄"];
 
 function createTable(){
   const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
   rows.forEach(r=>{
     let rowHTML = `<tr><td>${r}</td>`;
     cols.forEach(c=>{
@@ -124,6 +124,11 @@ async function loadData(){
 
 createTable();
 loadData();
+
+</script>
+</body>
+</html>
+
 
 </script>
 </body>
