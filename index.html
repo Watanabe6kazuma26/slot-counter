@@ -24,24 +24,20 @@ th,td{
   text-align:center;
 }
 button{
-  padding:6px 8px;
-  margin:2px;
+  padding:8px;
+  margin:3px;
   border:none;
   border-radius:6px;
-  font-size:12px;
+  font-size:13px;
 }
-.plus{background:#28a745;color:white;}
-.minus{background:#dc3545;color:white;}
+.plus{
+  background:#28a745;
+  color:white;
+  width:100%;
+}
 .refresh{
   background:#007bff;
   color:white;
-  width:100%;
-  padding:8px;
-  margin:5px 0;
-}
-.undo{
-  background:#ffc107;
-  color:black;
   width:100%;
   padding:8px;
   margin:5px 0;
@@ -53,7 +49,6 @@ button{
 <h3>検証カウンター</h3>
 
 <button class="refresh" onclick="loadData()">🔄 更新</button>
-<button class="undo" onclick="undoLast()">🧯 直前を取り消す</button>
 
 <table>
 <tr>
@@ -68,9 +63,7 @@ button{
 
 <script>
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz-FzPJ9hjklYJtEHlMwVfn7dNz5RVDtpJp9ArUVPu7AcRPZcnU2DXoj-epk7J-7Ynp/exec";
-
-let lastAction = null;
+const GAS_URL = "ここにApps ScriptのURLを貼る";
 
 const rows = [
 "偽革命1","偽革命2","偽革命3",
@@ -104,8 +97,7 @@ function createTable(){
       rowHTML += `
       <td>
         <div id="${id}">0</div>
-        <button class="plus" onclick="confirmSend('${r}','${c}',1)">＋</button>
-        <button class="minus" onclick="confirmSend('${r}','${c}',-1)">－</button>
+        <button class="plus" onclick="confirmSend('${r}','${c}')">＋</button>
       </td>`;
     });
 
@@ -114,48 +106,23 @@ function createTable(){
   });
 }
 
-function confirmSend(category,type,value){
-  let actionText = value === 1 ? "追加" : "減算";
-  if(confirm(`${category} / ${type} を ${actionText} しますか？`)){
-    send(category,type,value);
+function confirmSend(category,type){
+  if(confirm(`${category} / ${type} を追加しますか？`)){
+    send(category,type);
   }
 }
 
-async function send(category,type,value){
-
-  lastAction = {category,type,value};
+async function send(category,type){
 
   await fetch(GAS_URL,{
     method:"POST",
     body:JSON.stringify({
       category:category,
       type:type,
-      value:value
+      value:1
     })
   });
 
-  loadData();
-}
-
-async function undoLast(){
-
-  if(!lastAction){
-    alert("取り消す操作がありません");
-    return;
-  }
-
-  const reverseValue = lastAction.value * -1;
-
-  await fetch(GAS_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      category:lastAction.category,
-      type:lastAction.type,
-      value:reverseValue
-    })
-  });
-
-  lastAction = null;
   loadData();
 }
 
