@@ -13,8 +13,9 @@ th,td{border:1px solid black;padding:6px;text-align:center;}
 button{font-size:16px;padding:6px 10px;margin:2px;}
 </style>
 </head>
-
+  
 <body>
+<h2>累計総回数: <span id="totalCount">0</span></h2>
 
 <h3>ホール名入力</h3>
 <input type="text" id="hallName" placeholder="例：〇〇ホール">
@@ -31,16 +32,17 @@ button{font-size:16px;padding:6px 10px;margin:2px;}
 
 <script>
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxQHU0ViLDIYn2RqxHSqRq53MsrmdQ9Ahm9VCxI9Bfg2GHLTmZC9des8__EEmGxUvmd/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz7HTS_AkH7bSHw822cUcyMEBNJRZnasTY6snFIP6k1ZwABabbGXuKtAj20GcE2EBmb/exec";
 
 const rows = [
-"偽革命（通常）",
+"偽革命（二回前偽革命or下位ATでない）",
 "偽革命（2回前が偽革命）",
 "偽革命（2回前が下位AT）",
-"下位AT（通常）",
+"下位AT（二回前偽革命or下位ATでない）",
+"下位AT（2回前が偽革命）",
 "下位AT後（2回前が下位AT）"
 ];
-
+  
 const cols = ["優遇","優遇BB","優遇REG","地獄"];
 
 const table = document.getElementById("table");
@@ -77,6 +79,13 @@ function send(row,col,delta){
     })
   });
 }
+async function loadTotal() {
+  const res = await fetch(GAS_URL);
+  const data = await res.json();
+  document.getElementById("totalCount").innerText = data.total;
+}
+
+loadTotal();
 
 </script>
 
