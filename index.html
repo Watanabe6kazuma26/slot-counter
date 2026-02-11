@@ -37,4 +37,59 @@ input{
 button{
   width:90%;
   padding:15px;
-  marg
+  margin:5px 0;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+}
+
+.plus{ background:#28a745; color:white; }
+.minus{ background:#dc3545; color:white; }
+</style>
+</head>
+
+<body>
+
+<h1>スロット検証カウンター</h1>
+
+<div class="total">
+累計総回数: <span id="totalCount">0</span>
+</div>
+
+<input type="text" id="hallName" placeholder="ホール名を入力">
+
+<button class="plus" onclick="sendData('plus')">＋ カウント</button>
+<button class="minus" onclick="sendData('minus')">－ カウント</button>
+
+<script>
+
+const GAS_URL = "ここにあなたのWebアプリURLを貼る";
+
+async function sendData(type){
+
+  const hall = document.getElementById("hallName").value;
+
+  await fetch(GAS_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      hall:hall,
+      type:type
+    })
+  });
+
+  loadTotal(); // 送信後に総計更新
+}
+
+async function loadTotal(){
+  const res = await fetch(GAS_URL);
+  const data = await res.json();
+  document.getElementById("totalCount").innerText = data.total;
+}
+
+// ページ読み込み時に総計表示
+loadTotal();
+
+</script>
+
+</body>
+</html>
