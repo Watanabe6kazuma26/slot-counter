@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>検証カウンター（PC版）</title>
+
+<style>
+body{
+  font-family:sans-serif;
+  background:#f4f4f4;
+  padding:20px;
+}
+table{
+  border-collapse:collapse;
+  width:100%;
+}
+th,td{
+  border:1px solid #999;
+  padding:6px;
+  text-align:center;
+}
+button{
+  padding:6px 10px;
+  font-size:14px;
+  cursor:pointer;
+}
+.plus{
+  background:#28a745;
+  color:white;
+  border:none;
+  border-radius:4px;
+}
+.reset{
+  background:#dc3545;
+  color:white;
+  border:none;
+  border-radius:4px;
+  margin-bottom:10px;
+}
+</style>
+</head>
+<body>
+
+<h2>検証カウンター（PCローカル版）</h2>
+
+<button class="reset" onclick="resetData()">全リセット</button>
+
+<table>
+<tr>
+<th>状態</th>
+<th>優遇</th>
+<th>優遇(BB)</th>
+<th>優遇(reg)</th>
+<th>地獄</th>
+</tr>
+<tbody id="tableBody"></tbody>
+</table>
+
+<script>
+
+const rows = [
+"偽革命1","偽革命2","偽革命3",
+"下位AT1","BB1","下位AT後1",
+"BB2","下位AT後2","BB3"
+];
+
+const rowLabels = [
+"偽革命（二回前偽革命or下位ATでない）",
+"偽革命（2回前が偽革命）",
+"偽革命（2回前が下位AT）",
+"下位AT（二回前偽革命or下位ATでない）",
+"BB（二回前偽革命or下位ATでない）",
+"下位AT後（2回前が偽革命）",
+"BB（2回前が偽革命）",
+"下位AT後（２回前が下位AT）",
+"BB（2回前が下位AT）"
+];
+
+const cols = ["優遇","優遇BB","優遇REG","地獄"];
+
+function loadStorage(){
+  return JSON.parse(localStorage.getItem("counterData") || "{}");
+}
+
+function saveStorage(data){
+  localStorage.setItem("counterData", JSON.stringify(data));
+}
+
+function createTable(){
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+  const data = loadStorage();
+
+  rows.forEach((r,index)=>{
+    let rowHTML = `<tr><td>${rowLabels[index]}</td>`;
+
+    cols.forEach(c=>{
+      const key = r+"_"+c;
+      const count = data[key] || 0;
+
+      rowHTML += `
+      <td>
+        <div id="${key}">${count}</div>
+        <button class="plus" onclick="addCount('${key}')">＋</button>
+      </td>`;
+    });
+
+    rowHTML += `</tr>`;
+    tbody.innerHTML += rowHTML;
+  });
+}
+
+function addCount(key){
+  const data = loadStorage();
+  data[key] = (data[key] || 0) + 1;
+  saveStorage(data);
+  document.getElementById(key).innerText = data[key];
+}
+
+function resetData(){
+  if(confirm("本当に全てリセットしますか？")){
+    localStorage.removeItem("counterData");
+    createTable();
+  }
+}
+
+createTable();
+
+</script>
+</body>
+</html>
