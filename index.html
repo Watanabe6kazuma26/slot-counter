@@ -3,93 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スロット検証カウンター</title>
+<title>検証カウンター</title>
 
 <style>
 body{
-  font-family: sans-serif;
-  text-align:center;
+  font-family:sans-serif;
   background:#111;
   color:white;
   margin:0;
-  padding:10px;
+  padding:5px;
+  font-size:12px;
 }
-
-h1{
-  font-size:20px;
+table{
+  width:100%;
+  border-collapse:collapse;
 }
-
-.total{
-  font-size:22px;
-  margin:15px 0;
-  padding:10px;
-  background:#222;
-  border-radius:10px;
+th,td{
+  border:1px solid #333;
+  padding:4px;
+  text-align:center;
 }
-
-input{
-  width:90%;
-  padding:10px;
-  font-size:16px;
-  margin-bottom:10px;
-}
-
 button{
-  width:90%;
-  padding:15px;
-  margin:5px 0;
-  font-size:16px;
+  padding:4px 6px;
+  margin:2px;
   border:none;
-  border-radius:8px;
+  border-radius:4px;
 }
-
-.plus{ background:#28a745; color:white; }
-.minus{ background:#dc3545; color:white; }
+.plus{background:#28a745;color:white;}
+.minus{background:#dc3545;color:white;}
+.refresh{
+  background:#007bff;
+  color:white;
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+}
 </style>
 </head>
-
 <body>
 
-<h1>スロット検証カウンター</h1>
+<h3>検証カウンター（全体合算）</h3>
 
-<div class="total">
-累計総回数: <span id="totalCount">0</span>
-</div>
+<button class="refresh" onclick="loadData()">🔄 更新</button>
 
-<input type="text" id="hallName" placeholder="ホール名を入力">
-
-<button class="plus" onclick="sendData('plus')">＋ カウント</button>
-<button class="minus" onclick="sendData('minus')">－ カウント</button>
+<table>
+<tr>
+<th>状態</th>
+<th>優遇</th>
+<th>優遇(BB)</th>
+<th>優遇(reg)</th>
+<th>地獄</th>
+<th>合計</th>
+</tr>
+<tbody id="tableBody"></tbody>
+</table>
 
 <script>
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwVmIpj6AuFqrk2CGKMDC0bjV_jsu-3e2LJyT2yOjZfI9WhePOotm53owKFT_5AeNOv/exec";
+const GAS_URL = "ここにApps ScriptのURLを貼る";
 
-async function sendData(type){
+const rows = [
+"偽革命（二回前偽革命or下位ATでない）",
+"偽革命（2回前が偽革命）",
+"偽革命（2回前が下位AT）",
+"下位AT（二回前偽革命or下位ATでない）",
+"BB（二回前偽革命or下位ATでない）",
+"下位AT後（2回前が偽革命）",
+"BB（2回前が偽革命）",
+"下位AT後（２回前が下位AT）",
+"BB（2回前が下位AT）"
+];
 
-  const hall = document.getElementById("hallName").value;
+const cols = ["優遇","優遇（BB）","優遇(reg)","地獄"];
 
+function createTable(){
+  const tbody = document.getElementById("tableBody");
+  rows.forEach(r=>{
+    let rowHTML = `<tr><td>${r}</td>`;
+    cols.forEach(c=>{
+      const id = r+"_"+c;
+      rowHTML += `
+      <td>
+        <div id="${id}">0</div>
+        <button class="plus" onclick="send('${r}','${c}',1)">＋</button>
+        <button class="minus" onclick="send('${r}','${c}',-1)">－</button>
+      </td>`;
+    });
+    rowHTML += `<td id="${r}_total">0</td></tr>`;
+    tbody.innerHTML += rowHTML;
+  });
+}
+
+async function send(category,type,value){
   await fetch(GAS_URL,{
     method:"POST",
     body:JSON.stringify({
-      hall:hall,
-      type:type
+      category:category,
+      type:type,
+      value:value
     })
   });
-
-  loadTotal(); // 送信後に総計更新
+  loadData();
 }
 
-async function loadTotal(){
+async function loadData(){
   const res = await fetch(GAS_URL);
   const data = await res.json();
-  document.getElementById("totalCount").innerText = data.total;
+
+  rows.forEach(r=>{
+    let rowTotal = 0;
+    cols.forEach(c=>{
+      const key = r+"_"+c;
+      const count = data[key] || 0;
+      document.getElementById(key).innerText = count;
+      rowTotal += count;
+    });
+    document.getElementById(r+"_total").innerText = rowTotal;
+  });
 }
 
-// ページ読み込み時に総計表示
-loadTotal();
+createTable();
+loadData();
 
 </script>
-
 </body>
 </html>
