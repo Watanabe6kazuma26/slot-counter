@@ -1,93 +1,40 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
-<title>全ホール合算カウンター</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スロット検証カウンター</title>
 
 <style>
-body{font-family:sans-serif;margin:10px;}
-input{width:100%;padding:8px;font-size:16px;margin-bottom:10px;}
-table{border-collapse:collapse;width:100%;font-size:13px;}
-th,td{border:1px solid black;padding:6px;text-align:center;}
-button{font-size:16px;padding:6px 10px;margin:2px;}
-</style>
-</head>
-  
-<body>
-<h2>累計総回数: <span id="totalCount">0</span></h2>
-
-<h3>ホール名入力</h3>
-<input type="text" id="hallName" placeholder="例：〇〇ホール">
-
-<table id="table">
-<tr>
-<th></th>
-<th>優遇</th>
-<th>優遇BB</th>
-<th>優遇REG</th>
-<th>地獄</th>
-</tr>
-</table>
-
-<script>
-
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz7HTS_AkH7bSHw822cUcyMEBNJRZnasTY6snFIP6k1ZwABabbGXuKtAj20GcE2EBmb/exec";
-
-const rows = [
-"偽革命（二回前偽革命or下位ATでない）",
-"偽革命（2回前が偽革命）",
-"偽革命（2回前が下位AT）",
-"下位AT（二回前偽革命or下位ATでない）",
-"下位AT（2回前が偽革命）",
-"下位AT後（2回前が下位AT）"
-];
-  
-const cols = ["優遇","優遇BB","優遇REG","地獄"];
-
-const table = document.getElementById("table");
-
-rows.forEach(row=>{
-  let tr=document.createElement("tr");
-  let th=document.createElement("th");
-  th.textContent=row;
-  tr.appendChild(th);
-
-  cols.forEach(col=>{
-    let td=document.createElement("td");
-    td.innerHTML=`
-      <button onclick="send('${row}','${col}',1)">＋</button>
-      <button onclick="send('${row}','${col}',-1)">－</button>
-    `;
-    tr.appendChild(td);
-  });
-
-  table.appendChild(tr);
-});
-
-function send(row,col,delta){
-  const hall=document.getElementById("hallName").value;
-  if(!hall){ alert("ホール名を入力してください"); return; }
-
-  fetch(GAS_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      hall:hall,
-      row:row,
-      col:col,
-      delta:delta
-    })
-  });
-}
-async function loadTotal() {
-  const res = await fetch(GAS_URL);
-  const data = await res.json();
-  document.getElementById("totalCount").innerText = data.total;
+body{
+  font-family: sans-serif;
+  text-align:center;
+  background:#111;
+  color:white;
+  margin:0;
+  padding:10px;
 }
 
-loadTotal();
+h1{
+  font-size:20px;
+}
 
-</script>
+.total{
+  font-size:22px;
+  margin:15px 0;
+  padding:10px;
+  background:#222;
+  border-radius:10px;
+}
 
-</body>
-</html>
+input{
+  width:90%;
+  padding:10px;
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+button{
+  width:90%;
+  padding:15px;
+  marg
